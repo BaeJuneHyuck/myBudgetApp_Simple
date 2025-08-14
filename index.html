@@ -3,1256 +3,1543 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>예산 관리 앱</title>
-    <!-- CDN 라이브러리 로딩 순서 수정 및 프로덕션 버전 사용 -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://unpkg.com/recharts@2.8.0/umd/Recharts.js"></script>
-    <script src="https://unpkg.com/lucide-react@0.263.1/dist/umd/lucide-react.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#3b82f6',
-                        secondary: '#64748b'
-                    }
-                }
+    <title>스마트 가계부</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-outline:hover {
+            background: #f1f5f9;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .card-header {
+            padding: 1.5rem 1.5rem 0;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            margin-bottom: 2rem;
+        }
+
+        .tab-list {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 0.5rem;
+            padding: 0.25rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+        }
+
+        .tab-trigger {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #64748b;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-trigger.active {
+            background: white;
+            color: #1e293b;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .grid-cols-1 {
+            grid-template-columns: 1fr;
+        }
+
+        .grid-cols-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .grid-cols-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        .input, .select, .textarea {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+        }
+
+        .input:focus, .select:focus, .textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            margin-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Stats Cards */
+        .stat-card {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value.income {
+            color: #059669;
+        }
+
+        .stat-value.expense {
+            color: #dc2626;
+        }
+
+        .stat-value.balance {
+            color: #3b82f6;
+        }
+
+        .stat-value.balance.negative {
+            color: #dc2626;
+        }
+
+        /* Transaction List */
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            gap: 1rem;
+        }
+
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+
+        .transaction-info {
+            flex: 1;
+        }
+
+        .transaction-name {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .transaction-meta {
+            font-size: 0.75rem;
+            color: #64748b;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .transaction-amount {
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+
+        .transaction-amount.income {
+            color: #059669;
+        }
+
+        .transaction-amount.expense {
+            color: #dc2626;
+        }
+
+        .transaction-actions {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 0.125rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border-radius: 9999px;
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .badge-outline {
+            background: transparent;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Progress Bar */
+        .progress {
+            width: 100%;
+            height: 0.5rem;
+            background: #f1f5f9;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #3b82f6;
+            transition: width 0.3s;
+        }
+
+        .progress-bar.over-budget {
+            background: #dc2626;
+        }
+
+        /* Search */
+        .search-container {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+
+        .search-input {
+            padding-left: 2.5rem;
+        }
+
+        /* Calendar */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #e2e8f0;
+            border: 1px solid #e2e8f0;
+        }
+
+        .calendar-header {
+            background: #f8fafc;
+            padding: 0.5rem;
+            text-align: center;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .calendar-day {
+            background: white;
+            min-height: 80px;
+            padding: 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        .calendar-day-number {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .calendar-transactions {
+            font-size: 0.75rem;
+        }
+
+        .calendar-income {
+            color: #059669;
+        }
+
+        .calendar-expense {
+            color: #dc2626;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 1001;
+            max-width: 300px;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .toast-description {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .grid-cols-3 {
+                grid-template-columns: 1fr;
+            }
+            
+            .grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .transaction-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .transaction-actions {
+                align-self: flex-end;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .tab-list {
+                flex-wrap: wrap;
             }
         }
-    </script>
+
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem;
+        }
+
+        .mt-4 {
+            margin-top: 1rem;
+        }
+
+        .space-y-4 > * + * {
+            margin-top: 1rem;
+        }
+
+        .space-y-2 > * + * {
+            margin-top: 0.5rem;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .flex-wrap {
+            flex-wrap: wrap;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .justify-end {
+            justify-content: flex-end;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .gap-4 {
+            gap: 1rem;
+        }
+    </style>
 </head>
 <body>
-    <div id="root"></div>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    💰 스마트 가계부
+                </div>
+                <div class="header-buttons">
+                    <button class="btn btn-outline btn-sm" onclick="toggleDarkMode()">🌙</button>
+                    <button class="btn btn-outline btn-sm" onclick="exportData()">📥 내보내기</button>
+                    <button class="btn btn-outline btn-sm" onclick="document.getElementById('importFile').click()">📤 가져오기</button>
+                    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+                </div>
+            </div>
+        </div>
+    </header>
 
-    <script type="text/babel">
-        const { useState, useEffect, useMemo } = React;
-        const { createRoot } = ReactDOM;
-        const { 
-            BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-            PieChart, Pie, Cell, LineChart, Line 
-        } = Recharts;
-        
-        const LucideIcons = window.LucideReact || {};
-        const { 
-            Plus = () => React.createElement('span', null, '+'),
-            Trash2 = () => React.createElement('span', null, '🗑️'),
-            Calendar = () => React.createElement('span', null, '📅'),
-            TrendingUp = () => React.createElement('span', null, '📈'),
-            Target = () => React.createElement('span', null, '🎯'),
-            BarChart3 = () => React.createElement('span', null, '📊'),
-            PieChart: PieChartIcon = () => React.createElement('span', null, '🥧'),
-            DollarSign = () => React.createElement('span', null, '💰'),
-            CreditCard = () => React.createElement('span', null, '💳'),
-            Home = () => React.createElement('span', null, '🏠'),
-            Car = () => React.createElement('span', null, '🚗'),
-            Utensils = () => React.createElement('span', null, '🍽️'),
-            ShoppingBag = () => React.createElement('span', null, '🛍️'),
-            Gamepad2 = () => React.createElement('span', null, '🎮'),
-            MoreHorizontal = () => React.createElement('span', null, '⋯'
-        } = LucideIcons;
+    <main class="container" style="padding: 2rem 1rem;">
+        <div class="tabs">
+            <div class="tab-list">
+                <button class="tab-trigger active" onclick="switchTab('overview')">개요</button>
+                <button class="tab-trigger" onclick="switchTab('transactions')">거래내역</button>
+                <button class="tab-trigger" onclick="switchTab('budget')">예산관리</button>
+                <button class="tab-trigger" onclick="switchTab('calendar')">캘린더</button>
+                <button class="tab-trigger" onclick="switchTab('analytics')">분석</button>
+            </div>
 
-        // Constants
+            <!-- 개요 탭 -->
+            <div id="overview" class="tab-content active">
+                <div class="grid grid-cols-3 mb-4">
+                    <div class="card stat-card">
+                        <div class="card-content">
+                            <div class="stat-value income" id="totalIncome">₩0</div>
+                            <div>총 수입</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="card-content">
+                            <div class="stat-value expense" id="totalExpense">₩0</div>
+                            <div>총 지출</div>
+                        </div>
+                    </div>
+                    <div class="card stat-card">
+                        <div class="card-content">
+                            <div class="stat-value balance" id="balance">₩0</div>
+                            <div>잔액</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">예산 현황</div>
+                        </div>
+                        <div class="card-content" id="budgetOverview">
+                            <p style="color: #64748b;">설정된 예산이 없습니다.</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title flex items-center justify-between">
+                                🎯 저축 목표
+                                <button class="btn btn-outline btn-sm" onclick="openSavingsGoalModal()">설정</button>
+                            </div>
+                        </div>
+                        <div class="card-content" id="savingsGoal">
+                            <p style="color: #64748b;">저축 목표를 설정해보세요.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 거래내역 탭 -->
+            <div id="transactions" class="tab-content">
+                <div class="flex justify-between items-center mb-4 flex-wrap gap-4">
+                    <div class="flex gap-2 flex-wrap">
+                        <div class="search-container">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" class="input search-input" placeholder="거래 검색..." id="searchInput" oninput="filterTransactions()">
+                        </div>
+                        <select class="select" id="categoryFilter" onchange="filterTransactions()">
+                            <option value="all">모든 카테고리</option>
+                            <option value="급여">급여</option>
+                            <option value="부업">부업</option>
+                            <option value="투자">투자</option>
+                            <option value="기타수입">기타수입</option>
+                            <option value="식비">식비</option>
+                            <option value="교통">교통</option>
+                            <option value="쇼핑">쇼핑</option>
+                            <option value="문화">문화</option>
+                            <option value="의료">의료</option>
+                            <option value="교육">교육</option>
+                            <option value="주거">주거</option>
+                            <option value="기타">기타</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="openTransactionModal()">➕ 거래 추가</button>
+                </div>
+                <div class="card">
+                    <div class="card-content" id="transactionList">
+                        <p class="text-center" style="color: #64748b; padding: 2rem;">거래 내역이 없습니다.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 예산관리 탭 -->
+            <div id="budget" class="tab-content">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <div class="card-title">예산 설정</div>
+                        <p style="color: #64748b; font-size: 0.875rem;">카테고리별 예산을 설정하고 관리하세요.</p>
+                    </div>
+                    <div class="card-content">
+                        <div class="flex gap-2 flex-wrap">
+                            <select class="select" id="budgetCategory" style="flex: 1; min-width: 150px;">
+                                <option value="">카테고리 선택</option>
+                                <option value="식비">식비</option>
+                                <option value="교통">교통</option>
+                                <option value="쇼핑">쇼핑</option>
+                                <option value="문화">문화</option>
+                                <option value="의료">의료</option>
+                                <option value="교육">교육</option>
+                                <option value="주거">주거</option>
+                                <option value="기타">기타</option>
+                            </select>
+                            <input type="text" class="input" id="budgetAmount" placeholder="예산 금액" style="flex: 1; min-width: 150px;" oninput="formatNumberInput(this)">
+                            <button class="btn btn-primary" onclick="addBudget()">추가</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="budgetList" class="space-y-4"></div>
+            </div>
+
+            <!-- 캘린더 탭 -->
+            <div id="calendar" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="flex items-center justify-between">
+                            <div class="card-title" id="calendarTitle">2024년 1월</div>
+                            <div class="flex gap-2">
+                                <button class="btn btn-outline btn-sm" onclick="previousMonth()">◀</button>
+                                <button class="btn btn-outline btn-sm" onclick="nextMonth()">▶</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="calendar-grid" id="calendarGrid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 분석 탭 -->
+            <div id="analytics" class="tab-content">
+                <div class="space-y-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">카테고리별 지출</div>
+                        </div>
+                        <div class="card-content">
+                            <div class="chart-container" id="categoryChart">
+                                <p style="color: #64748b;">지출 데이터가 없습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">월별 수입/지출</div>
+                        </div>
+                        <div class="card-content">
+                            <div class="chart-container" id="monthlyChart">
+                                <p style="color: #64748b;">데이터가 없습니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 거래 추가/수정 모달 -->
+    <div id="transactionModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">새 거래 추가</div>
+                <p style="color: #64748b; font-size: 0.875rem;">새로운 수입 또는 지출을 추가하세요.</p>
+            </div>
+            <form id="transactionForm" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="label">유형</label>
+                        <select class="select" id="transactionType" onchange="updateCategories()">
+                            <option value="expense">지출</option>
+                            <option value="income">수입</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="label">카테고리</label>
+                        <select class="select" id="transactionCategory">
+                            <option value="">카테고리 선택</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="label">내용</label>
+                    <input type="text" class="input" id="transactionName" placeholder="거래 내용을 입력하세요" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="label">금액</label>
+                        <input type="text" class="input" id="transactionAmount" placeholder="0" required oninput="formatNumberInput(this)">
+                    </div>
+                    <div class="form-group">
+                        <label class="label">통화</label>
+                        <select class="select" id="transactionCurrency">
+                            <option value="KRW">₩ 원</option>
+                            <option value="USD">$ 달러</option>
+                            <option value="EUR">€ 유로</option>
+                            <option value="JPY">¥ 엔</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="label">날짜 및 시간</label>
+                    <input type="datetime-local" class="input" id="transactionDateTime" required>
+                </div>
+                <div class="form-group">
+                    <label class="label">태그 (쉼표로 구분)</label>
+                    <input type="text" class="input" id="transactionTags" placeholder="태그1, 태그2, 태그3">
+                </div>
+                <div class="form-group">
+                    <label class="label">메모</label>
+                    <textarea class="textarea" id="transactionMemo" placeholder="추가 메모를 입력하세요"></textarea>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" class="btn btn-secondary" onclick="closeTransactionModal()">취소</button>
+                    <button type="submit" class="btn btn-primary">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 저축 목표 모달 -->
+    <div id="savingsGoalModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">저축 목표 설정</div>
+            </div>
+            <form id="savingsGoalForm" class="space-y-4">
+                <div class="form-group">
+                    <label class="label">목표 이름</label>
+                    <input type="text" class="input" id="goalName" placeholder="예: 새 차 구매" required>
+                </div>
+                <div class="form-group">
+                    <label class="label">목표 금액</label>
+                    <input type="text" class="input" id="goalAmount" placeholder="0" required oninput="formatNumberInput(this)">
+                </div>
+                <div class="form-group">
+                    <label class="label">목표 날짜</label>
+                    <input type="date" class="input" id="goalDeadline" required>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" class="btn btn-secondary" onclick="closeSavingsGoalModal()">취소</button>
+                    <button type="submit" class="btn btn-primary">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let transactions = [];
+        let budgets = [];
+        let savingsGoal = null;
+        let currentDate = new Date();
+        let editingTransactionId = null;
+
+        // 카테고리 정의
         const CATEGORIES = {
             income: ["급여", "부업", "투자", "기타수입"],
-            expense: ["식비", "교통", "쇼핑", "문화", "의료", "교육", "주거", "기타"],
+            expense: ["식비", "교통", "쇼핑", "문화", "의료", "교육", "주거", "기타"]
         };
 
-        const CURRENCIES = [
-            { value: "KRW", label: "₩ 원", symbol: "₩" },
-            { value: "USD", label: "$ 달러", symbol: "$" },
-            { value: "EUR", label: "€ 유로", symbol: "€" },
-            { value: "JPY", label: "¥ 엔", symbol: "¥" },
-        ];
+        const CURRENCIES = {
+            KRW: "₩",
+            USD: "$",
+            EUR: "€",
+            JPY: "¥"
+        };
 
-        const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8", "#82CA9D", "#FFC658", "#FF7C7C"];
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            updateCategories();
+            setCurrentDateTime();
+            updateOverview();
+            renderCalendar();
+        });
 
-        // Toast Hook
-        function useToast() {
-            const [toasts, setToasts] = useState([]);
-
-            const toast = useCallback(({ title, description, variant = "default" }) => {
-                const id = Date.now();
-                setToasts(prev => [...prev, { id, title, description, variant }]);
-                setTimeout(() => {
-                    setToasts(prev => prev.filter(t => t.id !== id));
-                }, 3000);
-            }, []);
-
-            return { toast, toasts };
-        }
-
-        // UI Components
-        function Card({ children, className = "", ...props }) {
-            return (
-                <div className={`card p-6 ${className}`} {...props}>
-                    {children}
-                </div>
-            );
-        }
-
-        function CardHeader({ children, className = "" }) {
-            return <div className={`mb-4 ${className}`}>{children}</div>;
-        }
-
-        function CardTitle({ children, className = "" }) {
-            return <h3 className={`text-lg font-semibold ${className}`}>{children}</h3>;
-        }
-
-        function CardContent({ children, className = "" }) {
-            return <div className={className}>{children}</div>;
-        }
-
-        function Button({ children, variant = "primary", size = "default", className = "", onClick, ...props }) {
-            const baseClasses = "btn inline-flex items-center justify-center px-4 py-2 text-sm";
-            const variantClasses = {
-                primary: "btn-primary",
-                secondary: "btn-secondary", 
-                outline: "btn-outline",
-                ghost: "bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800"
-            };
-            const sizeClasses = {
-                sm: "px-2 py-1 text-xs",
-                default: "px-4 py-2 text-sm",
-                lg: "px-6 py-3 text-base"
-            };
-
-            return (
-                <button 
-                    className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
-                    onClick={onClick}
-                    {...props}
-                >
-                    {children}
-                </button>
-            );
-        }
-
-        function Input({ className = "", ...props }) {
-            return <input className={`input w-full ${className}`} {...props} />;
-        }
-
-        function Label({ children, htmlFor, className = "" }) {
-            return <label htmlFor={htmlFor} className={`block text-sm font-medium mb-1 ${className}`}>{children}</label>;
-        }
-
-        function Select({ children, value, onValueChange, className = "" }) {
-            return (
-                <select 
-                    className={`input ${className}`}
-                    value={value}
-                    onChange={(e) => onValueChange(e.target.value)}
-                >
-                    {children}
-                </select>
-            );
-        }
-
-        function SelectItem({ children, value }) {
-            return <option value={value}>{children}</option>;
-        }
-
-        function Badge({ children, variant = "secondary", className = "" }) {
-            const variantClasses = {
-                secondary: "badge-secondary",
-                outline: "badge-outline"
-            };
-            return <span className={`badge ${variantClasses[variant]} ${className}`}>{children}</span>;
-        }
-
-        function Progress({ value, className = "" }) {
-            return (
-                <div className={`progress h-2 ${className}`}>
-                    <div className="progress-bar" style={{ width: `${value}%` }}></div>
-                </div>
-            );
-        }
-
-        function Dialog({ children, open, onOpenChange }) {
-            if (!open) return null;
-            
-            return (
-                <div className="modal-overlay" onClick={() => onOpenChange(false)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        {children}
-                    </div>
-                </div>
-            );
-        }
-
-        function DialogTrigger({ children, asChild, ...props }) {
-            return React.cloneElement(children, props);
-        }
-
-        function DialogContent({ children }) {
-            return <>{children}</>;
-        }
-
-        function DialogHeader({ children }) {
-            return <div className="mb-4">{children}</div>;
-        }
-
-        function DialogTitle({ children }) {
-            return <h2 className="text-xl font-semibold">{children}</h2>;
-        }
-
-        function Textarea({ className = "", ...props }) {
-            return <textarea className={`input min-h-20 ${className}`} {...props} />;
-        }
-
-        function Tabs({ children, value, onValueChange }) {
-            return (
-                <div>
-                    {React.Children.map(children, child => 
-                        React.cloneElement(child, { activeTab: value, setActiveTab: onValueChange })
-                    )}
-                </div>
-            );
-        }
-
-        function TabsList({ children, activeTab, setActiveTab }) {
-            return (
-                <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1 mb-6 overflow-x-auto">
-                    {React.Children.map(children, child => 
-                        React.cloneElement(child, { activeTab, setActiveTab })
-                    )}
-                </div>
-            );
-        }
-
-        function TabsTrigger({ children, value, activeTab, setActiveTab }) {
-            const isActive = activeTab === value;
-            return (
-                <button
-                    className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
-                        isActive 
-                            ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm' 
-                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
-                    }`}
-                    onClick={() => setActiveTab(value)}
-                >
-                    {children}
-                </button>
-            );
-        }
-
-        function TabsContent({ children, value, activeTab }) {
-            if (activeTab !== value) return null;
-            return <div>{children}</div>;
-        }
-
-        function Toast({ toasts }) {
-            return (
-                <>
-                    {toasts.map(toast => (
-                        <div key={toast.id} className="toast">
-                            <div className="font-medium">{toast.title}</div>
-                            {toast.description && (
-                                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                    {toast.description}
-                                </div>
-                            )}
-                        </div>
-                    ))}
-                </>
-            );
-        }
-
-        // Transaction List Component
-        function TransactionList({ transactions, searchTerm, filterCategory, onEdit, onDelete }) {
-            const filteredTransactions = transactions
-                .filter((transaction) => {
-                    const matchesSearch =
-                        transaction.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        transaction.memo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        transaction.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-
-                    const matchesCategory = filterCategory === "all" || transaction.category === filterCategory;
-
-                    return matchesSearch && matchesCategory;
-                })
-                .sort((a, b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime());
-
-            const getCurrencySymbol = (currency) => {
-                const symbols = { KRW: "₩", USD: "$", EUR: "€", JPY: "¥" };
-                return symbols[currency] || currency;
-            };
-
-            const formatDateTime = (datetime) => {
-                return new Date(datetime).toLocaleString("ko-KR", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                });
-            };
-
-            if (filteredTransactions.length === 0) {
-                return (
-                    <Card>
-                        <CardContent className="py-8 text-center text-gray-500">
-                            거래 내역이 없습니다.
-                        </CardContent>
-                    </Card>
-                );
-            }
-
-            return (
-                <div className="space-y-2">
-                    {filteredTransactions.map((transaction) => (
-                        <Card key={transaction.id} className="hover:shadow-md transition-shadow">
-                            <CardContent className="p-4">
-                                <div className="flex items-center justify-between flex-col md:flex-row gap-4">
-                                    <div className="flex-1 w-full">
-                                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                            <Badge variant="secondary">{transaction.category}</Badge>
-                                            <span className="text-sm text-gray-500">{formatDateTime(transaction.datetime)}</span>
-                                            {transaction.currency !== "KRW" && <Badge variant="outline">{transaction.currency}</Badge>}
-                                        </div>
-                                        <h3 className="font-medium">{transaction.name}</h3>
-                                        {transaction.tags.length > 0 && (
-                                            <div className="flex gap-1 mt-1 flex-wrap">
-                                                {transaction.tags.map((tag) => (
-                                                    <Badge key={tag} variant="outline" className="text-xs">
-                                                        {tag}
-                                                    </Badge>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {transaction.memo && <p className="text-sm text-gray-500 mt-1">{transaction.memo}</p>}
-                                    </div>
-                                    <div className="text-right w-full md:w-auto">
-                                        <p className={`text-lg font-semibold ${
-                                            transaction.type === "income" ? "text-green-600" : "text-red-600"
-                                        }`}>
-                                            {transaction.type === "income" ? "+" : "-"}
-                                            {getCurrencySymbol(transaction.currency)}
-                                            {transaction.amount.toLocaleString()}
-                                        </p>
-                                        <div className="flex gap-1 mt-1 justify-end">
-                                            <Button variant="ghost" size="sm" onClick={() => onEdit(transaction)}>
-                                                <Edit className="h-4 w-4" />
-                                            </Button>
-                                            <Button variant="ghost" size="sm" onClick={() => onDelete(transaction.id)}>
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            );
-        }
-
-        // Budget Overview Component
-        function BudgetOverview({ budgets }) {
-            if (budgets.length === 0) {
-                return (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>예산 현황</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-gray-500">설정된 예산이 없습니다.</p>
-                        </CardContent>
-                    </Card>
-                );
-            }
-
-            return (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>예산 현황</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {budgets.slice(0, 5).map((budget) => {
-                            const percentage = budget.amount > 0 ? (budget.spent / budget.amount) * 100 : 0;
-                            const isOverBudget = percentage > 100;
-
-                            return (
-                                <div key={budget.category} className="space-y-2">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="font-medium">{budget.category}</span>
-                                        <span className={isOverBudget ? "text-red-600" : "text-gray-500"}>
-                                            ₩{budget.spent.toLocaleString()} / ₩{budget.amount.toLocaleString()}
-                                        </span>
-                                    </div>
-                                    <Progress value={Math.min(percentage, 100)} className={isOverBudget ? "bg-red-100" : ""} />
-                                </div>
-                            );
-                        })}
-                    </CardContent>
-                </Card>
-            );
-        }
-
-        // Expense Chart Component
-        function ExpenseChart({ transactions }) {
-            const expenseByCategory = transactions
-                .filter((t) => t.type === "expense")
-                .reduce((acc, transaction) => {
-                    acc[transaction.category] = (acc[transaction.category] || 0) + transaction.amount;
-                    return acc;
-                }, {});
-
-            const pieData = Object.entries(expenseByCategory).map(([category, amount]) => ({
-                name: category,
-                value: amount,
-            }));
-
-            const monthlyData = transactions.reduce((acc, transaction) => {
-                const month = new Date(transaction.datetime).toISOString().slice(0, 7);
-                if (!acc[month]) {
-                    acc[month] = { month, income: 0, expense: 0 };
+        // 데이터 로드/저장
+        function loadData() {
+            const savedData = localStorage.getItem('budgetAppData');
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    transactions = data.transactions || [];
+                    budgets = data.budgets || [];
+                    savingsGoal = data.savingsGoal || null;
+                } catch (error) {
+                    console.error('데이터 로드 실패:', error);
                 }
-                acc[month][transaction.type] += transaction.amount;
-                return acc;
-            }, {});
-
-            const barData = Object.values(monthlyData).sort((a, b) => a.month.localeCompare(b.month));
-
-            return (
-                <div className="grid gap-6 grid-cols-1">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>카테고리별 지출</CardTitle>
-                        </CardHeader>
-                        <CardContent className="overflow-hidden">
-                            {pieData.length > 0 ? (
-                                <div className="h-64 w-full">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <PieChart>
-                                            <Pie
-                                                data={pieData}
-                                                cx="50%"
-                                                cy="50%"
-                                                labelLine={false}
-                                                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                                                outerRadius={60}
-                                                fill="#8884d8"
-                                                dataKey="value"
-                                            >
-                                                {pieData.map((entry, index) => (
-                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                                ))}
-                                            </Pie>
-                                            <Tooltip />
-                                        </PieChart>
-                                    </ResponsiveContainer>
-                                </div>
-                            ) : (
-                                <p className="text-center text-gray-500 py-8">지출 데이터가 없습니다.</p>
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>월별 수입/지출</CardTitle>
-                        </CardHeader>
-                        <CardContent className="overflow-hidden">
-                            {barData.length > 0 ? (
-                                <div className="h-64 w-full">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart data={barData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                                            <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis dataKey="month" />
-                                            <YAxis />
-                                            <Tooltip />
-                                            <Bar dataKey="income" fill="#22c55e" />
-                                            <Bar dataKey="expense" fill="#ef4444" />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </div>
-                            ) : (
-                                <p className="text-center text-gray-500 py-8">데이터가 없습니다.</p>
-                            )}
-                        </CardContent>
-                    </Card>
-                </div>
-            );
-        }
-
-        // Calendar View Component
-        function CalendarView({ transactions }) {
-            const [currentDate, setCurrentDate] = useState(new Date());
-
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-
-            const firstDayOfMonth = new Date(year, month, 1);
-            const lastDayOfMonth = new Date(year, month + 1, 0);
-            const firstDayOfWeek = firstDayOfMonth.getDay();
-            const daysInMonth = lastDayOfMonth.getDate();
-
-            const previousMonth = () => {
-                setCurrentDate(new Date(year, month - 1, 1));
-            };
-
-            const nextMonth = () => {
-                setCurrentDate(new Date(year, month + 1, 1));
-            };
-
-            const getTransactionsForDate = (day) => {
-                const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-                return transactions.filter((t) => t.datetime.startsWith(dateStr));
-            };
-
-            const days = [];
-
-            // Empty cells for days before the first day of the month
-            for (let i = 0; i < firstDayOfWeek; i++) {
-                days.push(<div key={`empty-${i}`} className="h-24 border border-gray-200 dark:border-gray-700"></div>);
             }
-
-            // Days of the month
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dayTransactions = getTransactionsForDate(day);
-                const income = dayTransactions.filter((t) => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
-                const expense = dayTransactions.filter((t) => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
-
-                days.push(
-                    <div key={day} className="h-24 border border-gray-200 dark:border-gray-700 p-1 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                        <div className="text-sm font-medium mb-1">{day}</div>
-                        {dayTransactions.length > 0 && (
-                            <div className="space-y-1">
-                                {income > 0 && <div className="text-xs text-green-600">+₩{income.toLocaleString()}</div>}
-                                {expense > 0 && <div className="text-xs text-red-600">-₩{expense.toLocaleString()}</div>}
-                                <div className="text-xs font-medium">{dayTransactions.length}건</div>
-                            </div>
-                        )}
-                    </div>
-                );
-            }
-
-            return (
-                <Card>
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <CardTitle>
-                                {year}년 {month + 1}월
-                            </CardTitle>
-                            <div className="flex gap-2">
-                                <Button variant="outline" size="sm" onClick={previousMonth}>
-                                    <ChevronLeft className="h-4 w-4" />
-                                </Button>
-                                <Button variant="outline" size="sm" onClick={nextMonth}>
-                                    <ChevronRight className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-7 gap-0 border border-gray-200 dark:border-gray-700 overflow-x-auto">
-                            {["일", "월", "화", "수", "목", "금", "토"].map((day) => (
-                                <div
-                                    key={day}
-                                    className="h-8 border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-sm font-medium"
-                                >
-                                    {day}
-                                </div>
-                            ))}
-                            {days}
-                        </div>
-                    </CardContent>
-                </Card>
-            );
         }
 
-        // Savings Goal Component
-        function SavingsGoal({ savingsGoal, setSavingsGoal, currentSavings }) {
-            const [isDialogOpen, setIsDialogOpen] = useState(false);
-            const [formData, setFormData] = useState({
-                name: savingsGoal?.name || "",
-                target: savingsGoal?.target || 0,
-                deadline: savingsGoal?.deadline || "",
-            });
-
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                setSavingsGoal({
-                    ...formData,
-                    current: currentSavings,
-                });
-                setIsDialogOpen(false);
+        function saveData() {
+            const data = {
+                transactions,
+                budgets,
+                savingsGoal
             };
-
-            const progress = savingsGoal ? Math.min((currentSavings / savingsGoal.target) * 100, 100) : 0;
-
-            return (
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                        <CardTitle className="flex items-center gap-2">
-                            <Target className="h-5 w-5" />
-                            저축 목표
-                        </CardTitle>
-                        <Button variant="outline" size="sm" onClick={() => setIsDialogOpen(true)}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            {savingsGoal ? "수정" : "설정"}
-                        </Button>
-                    </CardHeader>
-                    <CardContent>
-                        {savingsGoal ? (
-                            <div className="space-y-4">
-                                <div>
-                                    <h3 className="font-medium">{savingsGoal.name}</h3>
-                                    <p className="text-sm text-gray-500">
-                                        목표일: {new Date(savingsGoal.deadline).toLocaleDateString("ko-KR")}
-                                    </p>
-                                </div>
-                                <div className="space-y-2">
-                                    <div className="flex justify-between text-sm">
-                                        <span>현재 저축액</span>
-                                        <span>
-                                            ₩{currentSavings.toLocaleString()} / ₩{savingsGoal.target.toLocaleString()}
-                                        </span>
-                                    </div>
-                                    <Progress value={progress} className="h-2" />
-                                    <p className="text-sm text-gray-500">
-                                        {progress.toFixed(1)}% 달성
-                                        {currentSavings >= savingsGoal.target && (
-                                            <span className="text-green-600 font-medium ml-2">목표 달성!</span>
-                                        )}
-                                    </p>
-                                </div>
-                            </div>
-                        ) : (
-                            <p className="text-gray-500">저축 목표를 설정해보세요.</p>
-                        )}
-                    </CardContent>
-
-                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>저축 목표 설정</DialogTitle>
-                            </DialogHeader>
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                <div>
-                                    <Label htmlFor="goalName">목표 이름</Label>
-                                    <Input
-                                        id="goalName"
-                                        value={formData.name}
-                                        onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                                        placeholder="예: 새 차 구매"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <Label htmlFor="targetAmount">목표 금액</Label>
-                                    <Input
-                                        id="targetAmount"
-                                        type="text"
-                                        value={formData.target ? formatNumber(formData.target) : ''}
-                                        onChange={(e) => {
-                                            const numValue = parseFormattedNumber(e.target.value);
-                                            setFormData((prev) => ({ ...prev, target: numValue }));
-                                        }}
-                                        placeholder="0"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <Label htmlFor="deadline">목표 날짜</Label>
-                                    <Input
-                                        id="deadline"
-                                        type="date"
-                                        value={formData.deadline}
-                                        onChange={(e) => setFormData((prev) => ({ ...prev, deadline: e.target.value }))}
-                                        required
-                                    />
-                                </div>
-                                <div className="flex justify-end gap-2">
-                                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                                        취소
-                                    </Button>
-                                    <Button type="submit">저장</Button>
-                                </div>
-                            </form>
-                        </DialogContent>
-                    </Dialog>
-                </Card>
-            );
+            localStorage.setItem('budgetAppData', JSON.stringify(data));
         }
 
-        // Transaction Form Component
-        function TransactionForm({ transaction, onSubmit, onCancel }) {
-            const [formData, setFormData] = useState({
-                type: transaction?.type || "expense",
-                category: transaction?.category || "select",
-                name: transaction?.name || "",
-                amount: transaction?.amount || 0,
-                currency: transaction?.currency || "KRW",
-                datetime: transaction?.datetime || new Date().toISOString().slice(0, 16),
-                tags: transaction?.tags?.join(", ") || "",
-                memo: transaction?.memo || "",
-            });
-
+        // 숫자 포맷팅
         function formatNumber(num) {
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         }
 
-        function parseFormattedNumber(str) {
+        function parseNumber(str) {
             return parseInt(str.replace(/,/g, '')) || 0;
         }
 
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                if (formData.category === "select") {
-                    return; // 카테고리가 선택되지 않았으면 제출하지 않음
-                }
-                onSubmit({
-                    ...formData,
-                    tags: formData.tags
-                        .split(",")
-                        .map((tag) => tag.trim())
-                        .filter(Boolean),
-                });
-            };
-
-            return (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <Label htmlFor="type">유형</Label>
-                            <Select
-                                value={formData.type}
-                                onValueChange={(value) =>
-                                    setFormData((prev) => ({ ...prev, type: value, category: "" }))
-                                }
-                            >
-                                <SelectItem value="income">수입</SelectItem>
-                                <SelectItem value="expense">지출</SelectItem>
-                            </Select>
-                        </div>
-                        <div>
-                            <Label htmlFor="category">카테고리</Label>
-                            <Select
-                                value={formData.category}
-                                onValueChange={(value) => setFormData((prev) => ({ ...prev, category: value }))}
-                            >
-                                <SelectItem value="select">카테고리 선택</SelectItem>
-                                {CATEGORIES[formData.type].map((category) => (
-                                    <SelectItem key={category} value={category}>
-                                        {category}
-                                    </SelectItem>
-                                ))}
-                            </Select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <Label htmlFor="name">내용</Label>
-                        <Input
-                            id="name"
-                            value={formData.name}
-                            onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                            placeholder="거래 내용을 입력하세요"
-                            required
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <Label htmlFor="amount">금액</Label>
-                            <Input
-                                id="amount"
-                                type="text"
-                                value={formData.amount ? formatNumber(formData.amount) : ''}
-                                onChange={(e) => {
-                                    const numValue = parseFormattedNumber(e.target.value);
-                                    setFormData((prev) => ({ ...prev, amount: numValue }));
-                                }}
-                                placeholder="0"
-                                required
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="currency">통화</Label>
-                            <Select
-                                value={formData.currency}
-                                onValueChange={(value) => setFormData((prev) => ({ ...prev, currency: value }))}
-                            >
-                                {CURRENCIES.map((currency) => (
-                                    <SelectItem key={currency.value} value={currency.value}>
-                                        {currency.label}
-                                    </SelectItem>
-                                ))}
-                            </Select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <Label htmlFor="datetime">날짜 및 시간</Label>
-                        <Input
-                            id="datetime"
-                            type="datetime-local"
-                            value={formData.datetime}
-                            onChange={(e) => setFormData((prev) => ({ ...prev, datetime: e.target.value }))}
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="tags">태그 (쉼표로 구분)</Label>
-                        <Input
-                            id="tags"
-                            value={formData.tags}
-                            onChange={(e) => setFormData((prev) => ({ ...prev, tags: e.target.value }))}
-                            placeholder="태그1, 태그2, 태그3"
-                        />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="memo">메모</Label>
-                        <Textarea
-                            id="memo"
-                            value={formData.memo}
-                            onChange={(e) => setFormData((prev) => ({ ...prev, memo: e.target.value }))}
-                            placeholder="추가 메모를 입력하세요"
-                        />
-                    </div>
-
-                    <div className="flex justify-end gap-2">
-                        <Button type="button" variant="outline" onClick={onCancel}>
-                            취소
-                        </Button>
-                        <Button type="submit">{transaction ? "수정" : "추가"}</Button>
-                    </div>
-                </form>
-            );
+        function formatNumberInput(input) {
+            const value = input.value.replace(/,/g, '');
+            if (!isNaN(value) && value !== '') {
+                input.value = formatNumber(parseInt(value));
+            }
         }
 
-        // Budget Management Component
-        function BudgetManagement({ budgets, setBudgets, transactions }) {
-            const [newBudget, setNewBudget] = useState({ category: "select", amount: 0 });
-
-            const addBudget = () => {
-                if (newBudget.category && newBudget.category !== "select" && newBudget.amount > 0) {
-                    const spent = transactions
-                        .filter((t) => t.type === "expense" && t.category === newBudget.category)
-                        .reduce((sum, t) => sum + t.amount, 0);
-
-                    setBudgets([
-                        ...budgets.filter((b) => b.category !== newBudget.category),
-                        {
-                            ...newBudget,
-                            spent,
-                        },
-                    ]);
-                    setNewBudget({ category: "select", amount: 0 });
-                }
-            };
-
-            const removeBudget = (category) => {
-                setBudgets(budgets.filter((b) => b.category !== category));
-            };
-
-            return (
-                <div className="space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>예산 설정</CardTitle>
-                            <p className="text-sm text-gray-500">카테고리별 예산을 설정하고 관리하세요.</p>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex flex-col md:flex-row gap-2">
-                                <Select
-                                    value={newBudget.category}
-                                    onValueChange={(value) => setNewBudget((prev) => ({ ...prev, category: value }))}
-                                    className="flex-1"
-                                >
-                                    <SelectItem value="select">카테고리 선택</SelectItem>
-                                    {CATEGORIES.expense.map((category) => (
-                                        <SelectItem key={category} value={category}>
-                                            {category}
-                                        </SelectItem>
-                                    ))}
-                                </Select>
-                                <Input
-                                    type="text"
-                                    placeholder="예산 금액"
-                                    value={newBudget.amount ? formatNumber(newBudget.amount) : ''}
-                                    onChange={(e) => {
-                                        const numValue = parseFormattedNumber(e.target.value);
-                                        setNewBudget((prev) => ({ ...prev, amount: numValue }));
-                                    }}
-                                    className="flex-1"
-                                />
-                                <Button onClick={addBudget}>추가</Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <div className="grid gap-4">
-                        {budgets.map((budget) => {
-                            const percentage = budget.amount > 0 ? (budget.spent / budget.amount) * 100 : 0;
-                            const isOverBudget = percentage > 100;
-
-                            return (
-                                <Card key={budget.category}>
-                                    <CardContent className="pt-6">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <h3 className="font-semibold">{budget.category}</h3>
-                                            <Button variant="ghost" size="sm" onClick={() => removeBudget(budget.category)}>
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <div className="flex justify-between text-sm">
-                                                <span>
-                                                    ₩{budget.spent.toLocaleString()} / ₩{budget.amount.toLocaleString()}
-                                                </span>
-                                                <span className={isOverBudget ? "text-red-600" : "text-gray-500"}>
-                                                    {percentage.toFixed(1)}%
-                                                </span>
-                                            </div>
-                                            <Progress value={Math.min(percentage, 100)} className={`h-2 ${isOverBudget ? "bg-red-100" : ""}`} />
-                                            {isOverBudget && (
-                                                <p className="text-sm text-red-600">
-                                                    예산을 ₩{(budget.spent - budget.amount).toLocaleString()} 초과했습니다.
-                                                </p>
-                                            )}
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            );
-                        })}
-                    </div>
-                </div>
-            );
+        // 탭 전환
+        function switchTab(tabName) {
+            // 모든 탭 비활성화
+            document.querySelectorAll('.tab-trigger').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // 선택된 탭 활성화
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            // 탭별 데이터 업데이트
+            if (tabName === 'overview') {
+                updateOverview();
+            } else if (tabName === 'transactions') {
+                renderTransactions();
+            } else if (tabName === 'budget') {
+                renderBudgets();
+            } else if (tabName === 'calendar') {
+                renderCalendar();
+            } else if (tabName === 'analytics') {
+                renderAnalytics();
+            }
         }
 
-        // Main App Component
-        function BudgetApp() {
-            const [transactions, setTransactions] = useState([]);
-            const [budgets, setBudgets] = useState([]);
-            const [savingsGoal, setSavingsGoal] = useState(null);
-            const [activeTab, setActiveTab] = useState("overview");
-            const [isDialogOpen, setIsDialogOpen] = useState(false);
-            const [editingTransaction, setEditingTransaction] = useState(null);
-            const [searchTerm, setSearchTerm] = useState("");
-            const [filterCategory, setFilterCategory] = useState("all");
-            const [isDarkMode, setIsDarkMode] = useState(false);
-            const { toast, toasts } = useToast();
-
-            // Load data from localStorage on mount
-            useEffect(() => {
-                const savedData = localStorage.getItem("budgetAppData");
-                if (savedData) {
-                    try {
-                        const data = JSON.parse(savedData);
-                        setTransactions(data.transactions || []);
-                        setBudgets(data.budgets || []);
-                        setSavingsGoal(data.savingsGoal || null);
-                        setIsDarkMode(data.isDarkMode || false);
-                    } catch (error) {
-                        console.error("Failed to load data:", error);
-                    }
-                }
-            }, []);
-
-            // Save data to localStorage whenever state changes
-            useEffect(() => {
-                const data = {
-                    transactions,
-                    budgets,
-                    savingsGoal,
-                    isDarkMode,
-                };
-                localStorage.setItem("budgetAppData", JSON.stringify(data));
-            }, [transactions, budgets, savingsGoal, isDarkMode]);
-
-            // Apply dark mode
-            useEffect(() => {
-                if (isDarkMode) {
-                    document.documentElement.classList.add("dark");
-                } else {
-                    document.documentElement.classList.remove("dark");
-                }
-            }, [isDarkMode]);
-
-            const addTransaction = (transaction) => {
-                const newTransaction = {
-                    ...transaction,
-                    id: Date.now().toString(),
-                };
-                setTransactions((prev) => [...prev, newTransaction]);
-
-                // Update budget spending
-                if (transaction.type === "expense") {
-                    setBudgets((prev) =>
-                        prev.map((budget) =>
-                            budget.category === transaction.category 
-                                ? { ...budget, spent: budget.spent + transaction.amount } 
-                                : budget
-                        )
-                    );
-                }
-
-                toast({
-                    title: "거래 추가됨",
-                    description: `${transaction.type === "income" ? "수입" : "지출"} ${transaction.amount.toLocaleString()}원이 추가되었습니다.`,
-                });
-            };
-
-            const updateTransaction = (updatedTransaction) => {
-                setTransactions((prev) => prev.map((t) => (t.id === updatedTransaction.id ? updatedTransaction : t)));
-                toast({
-                    title: "거래 수정됨",
-                    description: "거래 내역이 성공적으로 수정되었습니다.",
-                });
-            };
-
-            const deleteTransaction = (id) => {
-                const transaction = transactions.find((t) => t.id === id);
-                if (transaction) {
-                    setTransactions((prev) => prev.filter((t) => t.id !== id));
-
-                    // Update budget spending
-                    if (transaction.type === "expense") {
-                        setBudgets((prev) =>
-                            prev.map((budget) =>
-                                budget.category === transaction.category
-                                    ? { ...budget, spent: Math.max(0, budget.spent - transaction.amount) }
-                                    : budget
-                            )
-                        );
-                    }
-
-                    toast({
-                        title: "거래 삭제됨",
-                        description: "거래 내역이 삭제되었습니다.",
-                    });
-                }
-            };
-
-            const exportData = () => {
-                const data = { transactions, budgets, savingsGoal };
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `budget-data-${new Date().toISOString().split("T")[0]}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-
-                toast({
-                    title: "데이터 내보내기 완료",
-                    description: "데이터가 성공적으로 내보내졌습니다.",
-                });
-            };
-
-            const importData = (event) => {
-                const file = event.target.files?.[0];
-                if (!file) return;
-
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        const data = JSON.parse(e.target?.result);
-                        if (data.transactions) {
-                            setTransactions(data.transactions);
-                            setBudgets(data.budgets || []);
-                            setSavingsGoal(data.savingsGoal || null);
-                            toast({
-                                title: "데이터 가져오기 완료",
-                                description: "데이터가 성공적으로 가져와졌습니다.",
-                            });
-                        }
-                    } catch (error) {
-                        toast({
-                            title: "오류",
-                            description: "올바른 데이터 파일이 아닙니다.",
-                            variant: "destructive",
-                        });
-                    }
-                };
-                reader.readAsText(file);
-                event.target.value = "";
-            };
-
-            const totalIncome = transactions.filter((t) => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
-            const totalExpense = transactions.filter((t) => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
+        // 개요 업데이트
+        function updateOverview() {
+            const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+            const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
             const balance = totalIncome - totalExpense;
 
-            return (
-                <div className="min-h-screen bg-background">
-                    <header className="border-b bg-card">
-                        <div className="container mx-auto px-4 py-4">
-                            <div className="flex items-center justify-between flex-col md:flex-row gap-4">
-                                <div className="flex items-center gap-2">
-                                    <Wallet className="h-8 w-8 text-primary" />
-                                    <h1 className="text-2xl font-bold">스마트 가계부</h1>
-                                </div>
-                                <div className="flex items-center gap-2 flex-wrap">
-                                    <Button variant="outline" size="sm" onClick={() => setIsDarkMode(!isDarkMode)}>
-                                        {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                                    </Button>
-                                    <Button variant="outline" size="sm" onClick={exportData}>
-                                        <Download className="h-4 w-4 mr-2" />
-                                        내보내기
-                                    </Button>
-                                    <Button variant="outline" size="sm">
-                                        <label className="flex items-center cursor-pointer">
-                                            <Upload className="h-4 w-4 mr-2" />
-                                            가져오기
-                                            <input type="file" accept=".json" className="hidden" onChange={importData} />
-                                        </label>
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    </header>
+            document.getElementById('totalIncome').textContent = `₩${formatNumber(totalIncome)}`;
+            document.getElementById('totalExpense').textContent = `₩${formatNumber(totalExpense)}`;
+            
+            const balanceElement = document.getElementById('balance');
+            balanceElement.textContent = `₩${formatNumber(balance)}`;
+            balanceElement.className = `stat-value balance ${balance < 0 ? 'negative' : ''}`;
 
-                    <main className="container mx-auto px-4 py-6">
-                        <Tabs value={activeTab} onValueChange={setActiveTab}>
-                            <TabsList>
-                                <TabsTrigger value="overview">개요</TabsTrigger>
-                                <TabsTrigger value="transactions">거래내역</TabsTrigger>
-                                <TabsTrigger value="budget">예산관리</TabsTrigger>
-                                <TabsTrigger value="calendar">캘린더</TabsTrigger>
-                                <TabsTrigger value="analytics">분석</TabsTrigger>
-                            </TabsList>
-
-                            <TabsContent value="overview">
-                                <div className="space-y-6">
-                                    <div className="grid gap-4 md:grid-cols-3">
-                                        <Card>
-                                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                                <CardTitle className="text-sm font-medium">총 수입</CardTitle>
-                                                <TrendingUp className="h-4 w-4 text-green-600" />
-                                            </CardHeader>
-                                            <CardContent>
-                                                <div className="text-2xl font-bold text-green-600">₩{totalIncome.toLocaleString()}</div>
-                                            </CardContent>
-                                        </Card>
-                                        <Card>
-                                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                                <CardTitle className="text-sm font-medium">총 지출</CardTitle>
-                                                <TrendingDown className="h-4 w-4 text-red-600" />
-                                            </CardHeader>
-                                            <CardContent>
-                                                <div className="text-2xl font-bold text-red-600">₩{totalExpense.toLocaleString()}</div>
-                                            </CardContent>
-                                        </Card>
-                                        <Card>
-                                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                                <CardTitle className="text-sm font-medium">잔액</CardTitle>
-                                                <Wallet className="h-4 w-4 text-blue-600" />
-                                            </CardHeader>
-                                            <CardContent>
-                                                <div className={`text-2xl font-bold ${balance >= 0 ? "text-green-600" : "text-red-600"}`}>
-                                                    ₩{balance.toLocaleString()}
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    </div>
-
-                                    <div className="grid gap-6 md:grid-cols-2">
-                                        <BudgetOverview budgets={budgets} />
-                                        <SavingsGoal savingsGoal={savingsGoal} setSavingsGoal={setSavingsGoal} currentSavings={balance} />
-                                    </div>
-                                </div>
-                            </TabsContent>
-
-                            <TabsContent value="transactions">
-                                <div className="space-y-6">
-                                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                                        <div className="flex flex-col md:flex-row gap-2">
-                                            <div className="relative">
-                                                <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
-                                                <Input
-                                                    placeholder="거래 검색..."
-                                                    value={searchTerm}
-                                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                                    className="pl-8"
-                                                />
-                                            </div>
-                                            <Select value={filterCategory} onValueChange={setFilterCategory} className="w-full md:w-48">
-                                                <SelectItem value="all">모든 카테고리</SelectItem>
-                                                {[...CATEGORIES.income, ...CATEGORIES.expense].map((category) => (
-                                                    <SelectItem key={category} value={category}>
-                                                        {category}
-                                                    </SelectItem>
-                                                ))}
-                                            </Select>
-                                        </div>
-                                        <Button onClick={() => {
-                                            setEditingTransaction(null);
-                                            setIsDialogOpen(true);
-                                        }}>
-                                            <PlusCircle className="h-4 w-4 mr-2" />
-                                            거래 추가
-                                        </Button>
-                                    </div>
-
-                                    <TransactionList
-                                        transactions={transactions}
-                                        searchTerm={searchTerm}
-                                        filterCategory={filterCategory}
-                                        onEdit={(transaction) => {
-                                            setEditingTransaction(transaction);
-                                            setIsDialogOpen(true);
-                                        }}
-                                        onDelete={deleteTransaction}
-                                    />
-                                </div>
-                            </TabsContent>
-
-                            <TabsContent value="budget">
-                                <BudgetManagement budgets={budgets} setBudgets={setBudgets} transactions={transactions} />
-                            </TabsContent>
-
-                            <TabsContent value="calendar">
-                                <CalendarView transactions={transactions} />
-                            </TabsContent>
-
-                            <TabsContent value="analytics">
-                                <ExpenseChart transactions={transactions} />
-                            </TabsContent>
-                        </Tabs>
-                    </main>
-
-                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>{editingTransaction ? "거래 수정" : "새 거래 추가"}</DialogTitle>
-                                <p className="text-sm text-gray-500">
-                                    {editingTransaction ? "거래 정보를 수정하세요." : "새로운 수입 또는 지출을 추가하세요."}
-                                </p>
-                            </DialogHeader>
-                            <TransactionForm
-                                transaction={editingTransaction}
-                                onSubmit={(transaction) => {
-                                    if (editingTransaction) {
-                                        updateTransaction({ ...transaction, id: editingTransaction.id });
-                                    } else {
-                                        addTransaction(transaction);
-                                    }
-                                    setIsDialogOpen(false);
-                                    setEditingTransaction(null);
-                                }}
-                                onCancel={() => {
-                                    setIsDialogOpen(false);
-                                    setEditingTransaction(null);
-                                }}
-                            />
-                        </DialogContent>
-                    </Dialog>
-
-                    <Toast toasts={toasts} />
-                </div>
-            );
+            updateBudgetOverview();
+            updateSavingsGoalDisplay();
         }
 
-        // Render the app
-        ReactDOM.render(<BudgetApp />, document.getElementById('root'));
+        // 예산 현황 업데이트
+        function updateBudgetOverview() {
+            const container = document.getElementById('budgetOverview');
+            
+            if (budgets.length === 0) {
+                container.innerHTML = '<p style="color: #64748b;">설정된 예산이 없습니다.</p>';
+                return;
+            }
+
+            const html = budgets.slice(0, 5).map(budget => {
+                const percentage = budget.amount > 0 ? (budget.spent / budget.amount) * 100 : 0;
+                const isOverBudget = percentage > 100;
+                
+                return `
+                    <div class="space-y-2 mb-4">
+                        <div class="flex justify-between" style="font-size: 0.875rem;">
+                            <span style="font-weight: 500;">${budget.category}</span>
+                            <span style="color: ${isOverBudget ? '#dc2626' : '#64748b'};">
+                                ₩${formatNumber(budget.spent)} / ₩${formatNumber(budget.amount)}
+                            </span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar ${isOverBudget ? 'over-budget' : ''}" 
+                                 style="width: ${Math.min(percentage, 100)}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
+        }
+
+        // 저축 목표 표시 업데이트
+        function updateSavingsGoalDisplay() {
+            const container = document.getElementById('savingsGoal');
+            
+            if (!savingsGoal) {
+                container.innerHTML = '<p style="color: #64748b;">저축 목표를 설정해보세요.</p>';
+                return;
+            }
+
+            const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+            const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+            const currentSavings = totalIncome - totalExpense;
+            const progress = savingsGoal.target > 0 ? Math.min((currentSavings / savingsGoal.target) * 100, 100) : 0;
+
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <h3 style="font-weight: 500;">${savingsGoal.name}</h3>
+                        <p style="font-size: 0.875rem; color: #64748b;">
+                            목표일: ${new Date(savingsGoal.deadline).toLocaleDateString('ko-KR')}
+                        </p>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between" style="font-size: 0.875rem;">
+                            <span>현재 저축액</span>
+                            <span>₩${formatNumber(currentSavings)} / ₩${formatNumber(savingsGoal.target)}</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: ${progress}%"></div>
+                        </div>
+                        <p style="font-size: 0.875rem; color: #64748b;">
+                            ${progress.toFixed(1)}% 달성
+                            ${currentSavings >= savingsGoal.target ? '<span style="color: #059669; font-weight: 500; margin-left: 0.5rem;">목표 달성!</span>' : ''}
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 거래내역 렌더링
+        function renderTransactions() {
+            const container = document.getElementById('transactionList');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            
+            let filteredTransactions = transactions.filter(transaction => {
+                const matchesSearch = transaction.name.toLowerCase().includes(searchTerm) ||
+                                    (transaction.memo && transaction.memo.toLowerCase().includes(searchTerm)) ||
+                                    (transaction.tags && transaction.tags.some(tag => tag.toLowerCase().includes(searchTerm)));
+                
+                const matchesCategory = categoryFilter === 'all' || transaction.category === categoryFilter;
+                
+                return matchesSearch && matchesCategory;
+            });
+
+            // 날짜순 정렬 (최신순)
+            filteredTransactions.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+
+            if (filteredTransactions.length === 0) {
+                container.innerHTML = '<p class="text-center" style="color: #64748b; padding: 2rem;">거래 내역이 없습니다.</p>';
+                return;
+            }
+
+            const html = filteredTransactions.map(transaction => {
+                const currencySymbol = CURRENCIES[transaction.currency] || transaction.currency;
+                const formattedDateTime = new Date(transaction.datetime).toLocaleString('ko-KR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                return `
+                    <div class="transaction-item">
+                        <div class="transaction-info">
+                            <div class="transaction-name">${transaction.name}</div>
+                            <div class="transaction-meta">
+                                <span class="badge">${transaction.category}</span>
+                                <span>${formattedDateTime}</span>
+                                ${transaction.currency !== 'KRW' ? `<span class="badge badge-outline">${transaction.currency}</span>` : ''}
+                            </div>
+                            ${transaction.tags && transaction.tags.length > 0 ? `
+                                <div style="margin-top: 0.25rem;">
+                                    ${transaction.tags.map(tag => `<span class="badge badge-outline" style="font-size: 0.75rem; margin-right: 0.25rem;">${tag}</span>`).join('')}
+                                </div>
+                            ` : ''}
+                            ${transaction.memo ? `<p style="font-size: 0.875rem; color: #64748b; margin-top: 0.25rem;">${transaction.memo}</p>` : ''}
+                        </div>
+                        <div class="text-right">
+                            <div class="transaction-amount ${transaction.type}">
+                                ${transaction.type === 'income' ? '+' : '-'}${currencySymbol}${formatNumber(transaction.amount)}
+                            </div>
+                            <div class="transaction-actions mt-4">
+                                <button class="btn btn-outline btn-sm" onclick="editTransaction('${transaction.id}')">✏️</button>
+                                <button class="btn btn-outline btn-sm" onclick="deleteTransaction('${transaction.id}')">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = html;
+        }
+
+        // 거래내역 필터링
+        function filterTransactions() {
+            renderTransactions();
+        }
+
+        // 거래 모달 관련
+        function openTransactionModal(transactionId = null) {
+            editingTransactionId = transactionId;
+            const modal = document.getElementById('transactionModal');
+            const title = document.getElementById('modalTitle');
+            
+            if (transactionId) {
+                const transaction = transactions.find(t => t.id === transactionId);
+                if (transaction) {
+                    title.textContent = '거래 수정';
+                    fillTransactionForm(transaction);
+                }
+            } else {
+                title.textContent = '새 거래 추가';
+                resetTransactionForm();
+            }
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closeTransactionModal() {
+            document.getElementById('transactionModal').classList.add('hidden');
+            editingTransactionId = null;
+        }
+
+        function fillTransactionForm(transaction) {
+            document.getElementById('transactionType').value = transaction.type;
+            updateCategories();
+            document.getElementById('transactionCategory').value = transaction.category;
+            document.getElementById('transactionName').value = transaction.name;
+            document.getElementById('transactionAmount').value = formatNumber(transaction.amount);
+            document.getElementById('transactionCurrency').value = transaction.currency;
+            document.getElementById('transactionDateTime').value = transaction.datetime;
+            document.getElementById('transactionTags').value = transaction.tags ? transaction.tags.join(', ') : '';
+            document.getElementById('transactionMemo').value = transaction.memo || '';
+        }
+
+        function resetTransactionForm() {
+            document.getElementById('transactionForm').reset();
+            updateCategories();
+            setCurrentDateTime();
+        }
+
+        function setCurrentDateTime() {
+            const now = new Date();
+            const datetime = now.toISOString().slice(0, 16);
+            document.getElementById('transactionDateTime').value = datetime;
+        }
+
+        function updateCategories() {
+            const type = document.getElementById('transactionType').value;
+            const categorySelect = document.getElementById('transactionCategory');
+            
+            categorySelect.innerHTML = '<option value="">카테고리 선택</option>';
+            CATEGORIES[type].forEach(category => {
+                categorySelect.innerHTML += `<option value="${category}">${category}</option>`;
+            });
+        }
+
+        // 거래 추가/수정/삭제
+        document.getElementById('transactionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                type: document.getElementById('transactionType').value,
+                category: document.getElementById('transactionCategory').value,
+                name: document.getElementById('transactionName').value,
+                amount: parseNumber(document.getElementById('transactionAmount').value),
+                currency: document.getElementById('transactionCurrency').value,
+                datetime: document.getElementById('transactionDateTime').value,
+                tags: document.getElementById('transactionTags').value.split(',').map(tag => tag.trim()).filter(Boolean),
+                memo: document.getElementById('transactionMemo').value
+            };
+
+            if (!formData.category) {
+                alert('카테고리를 선택해주세요.');
+                return;
+            }
+
+            if (editingTransactionId) {
+                // 수정
+                const index = transactions.findIndex(t => t.id === editingTransactionId);
+                if (index !== -1) {
+                    transactions[index] = { ...formData, id: editingTransactionId };
+                    showToast('거래 수정됨', '거래 내역이 성공적으로 수정되었습니다.');
+                }
+            } else {
+                // 추가
+                const newTransaction = {
+                    ...formData,
+                    id: Date.now().toString()
+                };
+                transactions.push(newTransaction);
+                showToast('거래 추가됨', `${formData.type === 'income' ? '수입' : '지출'} ${formatNumber(formData.amount)}원이 추가되었습니다.`);
+            }
+
+            updateBudgetSpending();
+            saveData();
+            closeTransactionModal();
+            updateOverview();
+            renderTransactions();
+        });
+
+        function editTransaction(id) {
+            openTransactionModal(id);
+        }
+
+        function deleteTransaction(id) {
+            if (confirm('이 거래를 삭제하시겠습니까?')) {
+                const transaction = transactions.find(t => t.id === id);
+                transactions = transactions.filter(t => t.id !== id);
+                
+                updateBudgetSpending();
+                saveData();
+                updateOverview();
+                renderTransactions();
+                showToast('거래 삭제됨', '거래 내역이 삭제되었습니다.');
+            }
+        }
+
+        // 예산 관리
+        function addBudget() {
+            const category = document.getElementById('budgetCategory').value;
+            const amount = parseNumber(document.getElementById('budgetAmount').value);
+            
+            if (!category || amount <= 0) {
+                alert('카테고리와 금액을 올바르게 입력해주세요.');
+                return;
+            }
+
+            // 기존 예산 제거 후 새로 추가
+            budgets = budgets.filter(b => b.category !== category);
+            
+            const spent = transactions
+                .filter(t => t.type === 'expense' && t.category === category)
+                .reduce((sum, t) => sum + t.amount, 0);
+
+            budgets.push({
+                category,
+                amount,
+                spent
+            });
+
+            document.getElementById('budgetCategory').value = '';
+            document.getElementById('budgetAmount').value = '';
+            
+            saveData();
+            renderBudgets();
+            updateOverview();
+        }
+
+        function renderBudgets() {
+            const container = document.getElementById('budgetList');
+            
+            if (budgets.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const html = budgets.map(budget => {
+                const percentage = budget.amount > 0 ? (budget.spent / budget.amount) * 100 : 0;
+                const isOverBudget = percentage > 100;
+                
+                return `
+                    <div class="card">
+                        <div class="card-content">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 style="font-weight: 600;">${budget.category}</h3>
+                                <button class="btn btn-outline btn-sm" onclick="removeBudget('${budget.category}')">🗑️</button>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex justify-between" style="font-size: 0.875rem;">
+                                    <span>₩${formatNumber(budget.spent)} / ₩${formatNumber(budget.amount)}</span>
+                                    <span style="color: ${isOverBudget ? '#dc2626' : '#64748b'};">${percentage.toFixed(1)}%</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar ${isOverBudget ? 'over-budget' : ''}" 
+                                         style="width: ${Math.min(percentage, 100)}%"></div>
+                                </div>
+                                ${isOverBudget ? `
+                                    <p style="font-size: 0.875rem; color: #dc2626;">
+                                        예산을 ₩${formatNumber(budget.spent - budget.amount)} 초과했습니다.
+                                    </p>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = html;
+        }
+
+        function removeBudget(category) {
+            if (confirm(`${category} 예산을 삭제하시겠습니까?`)) {
+                budgets = budgets.filter(b => b.category !== category);
+                saveData();
+                renderBudgets();
+                updateOverview();
+            }
+        }
+
+        function updateBudgetSpending() {
+            budgets.forEach(budget => {
+                budget.spent = transactions
+                    .filter(t => t.type === 'expense' && t.category === budget.category)
+                    .reduce((sum, t) => sum + t.amount, 0);
+            });
+        }
+
+        // 저축 목표 관리
+        function openSavingsGoalModal() {
+            const modal = document.getElementById('savingsGoalModal');
+            
+            if (savingsGoal) {
+                document.getElementById('goalName').value = savingsGoal.name;
+                document.getElementById('goalAmount').value = formatNumber(savingsGoal.target);
+                document.getElementById('goalDeadline').value = savingsGoal.deadline;
+            } else {
+                document.getElementById('savingsGoalForm').reset();
+            }
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closeSavingsGoalModal() {
+            document.getElementById('savingsGoalModal').classList.add('hidden');
+        }
+
+        document.getElementById('savingsGoalForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            savingsGoal = {
+                name: document.getElementById('goalName').value,
+                target: parseNumber(document.getElementById('goalAmount').value),
+                deadline: document.getElementById('goalDeadline').value
+            };
+            
+            saveData();
+            closeSavingsGoalModal();
+            updateOverview();
+            showToast('저축 목표 설정됨', '저축 목표가 성공적으로 설정되었습니다.');
+        });
+
+        // 캘린더 렌더링
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            document.getElementById('calendarTitle').textContent = `${year}년 ${month + 1}월`;
+            
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const firstDayOfWeek = firstDay.getDay();
+            const daysInMonth = lastDay.getDate();
+            
+            let html = '';
+            
+            // 요일 헤더
+            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+            dayNames.forEach(day => {
+                html += `<div class="calendar-header">${day}</div>`;
+            });
+            
+            // 빈 셀 (이전 달)
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                html += '<div class="calendar-day"></div>';
+            }
+            
+            // 날짜 셀
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayTransactions = transactions.filter(t => t.datetime.startsWith(dateStr));
+                
+                const income = dayTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+                const expense = dayTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+                
+                html += `
+                    <div class="calendar-day">
+                        <div class="calendar-day-number">${day}</div>
+                        ${dayTransactions.length > 0 ? `
+                            <div class="calendar-transactions">
+                                ${income > 0 ? `<div class="calendar-income">+₩${formatNumber(income)}</div>` : ''}
+                                ${expense > 0 ? `<div class="calendar-expense">-₩${formatNumber(expense)}</div>` : ''}
+                                <div style="font-weight: 500;">${dayTransactions.length}건</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+            
+            document.getElementById('calendarGrid').innerHTML = html;
+        }
+
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        }
+
+        // 분석 렌더링
+        function renderAnalytics() {
+            renderCategoryChart();
+            renderMonthlyChart();
+        }
+
+        function renderCategoryChart() {
+            const container = document.getElementById('categoryChart');
+            
+            const expenseByCategory = transactions
+                .filter(t => t.type === 'expense')
+                .reduce((acc, t) => {
+                    acc[t.category] = (acc[t.category] || 0) + t.amount;
+                    return acc;
+                }, {});
+            
+            const categories = Object.keys(expenseByCategory);
+            
+            if (categories.length === 0) {
+                container.innerHTML = '<p style="color: #64748b;">지출 데이터가 없습니다.</p>';
+                return;
+            }
+            
+            const total = Object.values(expenseByCategory).reduce((sum, amount) => sum + amount, 0);
+            
+            let html = '<div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center;">';
+            
+            categories.forEach((category, index) => {
+                const amount = expenseByCategory[category];
+                const percentage = ((amount / total) * 100).toFixed(1);
+                const colors = ['#3b82f6', '#059669', '#dc2626', '#f59e0b', '#8b5cf6', '#06b6d4', '#84cc16', '#f97316'];
+                const color = colors[index % colors.length];
+                
+                html += `
+                    <div style="text-align: center; margin: 0.5rem;">
+                        <div style="width: 60px; height: 60px; border-radius: 50%; background: ${color}; margin: 0 auto 0.5rem; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.875rem;">
+                            ${percentage}%
+                        </div>
+                        <div style="font-size: 0.875rem; font-weight: 500;">${category}</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">₩${formatNumber(amount)}</div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function renderMonthlyChart() {
+            const container = document.getElementById('monthlyChart');
+            
+            const monthlyData = transactions.reduce((acc, t) => {
+                const month = t.datetime.slice(0, 7); // YYYY-MM
+                if (!acc[month]) {
+                    acc[month] = { income: 0, expense: 0 };
+                }
+                acc[month][t.type] += t.amount;
+                return acc;
+            }, {});
+            
+            const months = Object.keys(monthlyData).sort();
+            
+            if (months.length === 0) {
+                container.innerHTML = '<p style="color: #64748b;">데이터가 없습니다.</p>';
+                return;
+            }
+            
+            const maxAmount = Math.max(...months.map(month => 
+                Math.max(monthlyData[month].income, monthlyData[month].expense)
+            ));
+            
+            let html = '<div style="display: flex; align-items: end; gap: 1rem; height: 200px; padding: 1rem; overflow-x: auto;">';
+            
+            months.forEach(month => {
+                const data = monthlyData[month];
+                const incomeHeight = (data.income / maxAmount) * 150;
+                const expenseHeight = (data.expense / maxAmount) * 150;
+                
+                html += `
+                    <div style="display: flex; flex-direction: column; align-items: center; min-width: 80px;">
+                        <div style="display: flex; align-items: end; gap: 4px; margin-bottom: 0.5rem;">
+                            <div style="width: 20px; height: ${incomeHeight}px; background: #059669; border-radius: 2px;" title="수입: ₩${formatNumber(data.income)}"></div>
+                            <div style="width: 20px; height: ${expenseHeight}px; background: #dc2626; border-radius: 2px;" title="지출: ₩${formatNumber(data.expense)}"></div>
+                        </div>
+                        <div style="font-size: 0.75rem; text-align: center;">${month}</div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            html += '<div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; font-size: 0.875rem;">';
+            html += '<div><span style="display: inline-block; width: 12px; height: 12px; background: #059669; margin-right: 0.5rem;"></span>수입</div>';
+            html += '<div><span style="display: inline-block; width: 12px; height: 12px; background: #dc2626; margin-right: 0.5rem;"></span>지출</div>';
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+
+        // 데이터 내보내기/가져오기
+        function exportData() {
+            const data = { transactions, budgets, savingsGoal };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `budget-data-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('데이터 내보내기 완료', '데이터가 성공적으로 내보내졌습니다.');
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.transactions) {
+                        transactions = data.transactions;
+                        budgets = data.budgets || [];
+                        savingsGoal = data.savingsGoal || null;
+                        saveData();
+                        updateOverview();
+                        renderTransactions();
+                        renderBudgets();
+                        renderCalendar();
+                        showToast('데이터 가져오기 완료', '데이터가 성공적으로 가져와졌습니다.');
+                    } else {
+                        alert('올바른 데이터 파일이 아닙니다.');
+                    }
+                } catch (error) {
+                    alert('파일을 읽는 중 오류가 발생했습니다.');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // 토스트 알림
+        function showToast(title, description) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+                <div class="toast-title">${title}</div>
+                <div class="toast-description">${description}</div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // 다크모드 (간단 구현)
+        function toggleDarkMode() {
+            // 간단한 다크모드 토글 (실제 구현은 CSS 변수 사용)
+            showToast('다크모드', '다크모드 기능은 추후 업데이트 예정입니다.');
+        }
+
+        // 모달 외부 클릭시 닫기
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.classList.add('hidden');
+            }
+        });
     </script>
 </body>
 </html>
