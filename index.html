@@ -3,235 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>스마트 가계부</title>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <title>예산 관리 앱</title>
+    <!-- CDN 라이브러리 로딩 순서 수정 및 프로덕션 버전 사용 -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/recharts@2.8.0/umd/Recharts.js"></script>
     <script src="https://unpkg.com/lucide-react@0.263.1/dist/umd/lucide-react.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Custom CSS Variables for Design System */
-        :root {
-            --background: #ffffff;
-            --foreground: #0a0a0a;
-            --card: #ffffff;
-            --card-foreground: #0a0a0a;
-            --popover: #ffffff;
-            --popover-foreground: #0a0a0a;
-            --primary: #171717;
-            --primary-foreground: #fafafa;
-            --secondary: #f5f5f5;
-            --secondary-foreground: #171717;
-            --muted: #f5f5f5;
-            --muted-foreground: #737373;
-            --accent: #f5f5f5;
-            --accent-foreground: #171717;
-            --destructive: #dc2626;
-            --destructive-foreground: #fafafa;
-            --border: #e5e5e5;
-            --input: #e5e5e5;
-            --ring: #a3a3a3;
-            --radius: 0.5rem;
-        }
-
-        .dark {
-            --background: #0a0a0a;
-            --foreground: #fafafa;
-            --card: #0a0a0a;
-            --card-foreground: #fafafa;
-            --popover: #0a0a0a;
-            --popover-foreground: #fafafa;
-            --primary: #fafafa;
-            --primary-foreground: #171717;
-            --secondary: #262626;
-            --secondary-foreground: #fafafa;
-            --muted: #262626;
-            --muted-foreground: #a3a3a3;
-            --accent: #262626;
-            --accent-foreground: #fafafa;
-            --destructive: #7f1d1d;
-            --destructive-foreground: #fafafa;
-            --border: #262626;
-            --input: #262626;
-            --ring: #525252;
-        }
-
-        body {
-            background-color: var(--background);
-            color: var(--foreground);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-
-        /* Custom component styles */
-        .card {
-            background-color: var(--card);
-            color: var(--card-foreground);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-        }
-
-        .btn {
-            border-radius: var(--radius);
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: var(--primary-foreground);
-            border: 1px solid var(--primary);
-        }
-
-        .btn-secondary {
-            background-color: var(--secondary);
-            color: var(--secondary-foreground);
-            border: 1px solid var(--border);
-        }
-
-        .btn-outline {
-            background-color: transparent;
-            color: var(--foreground);
-            border: 1px solid var(--border);
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-        }
-
-        .input {
-            background-color: var(--background);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 0.5rem 0.75rem;
-            color: var(--foreground);
-        }
-
-        .input:focus {
-            outline: 2px solid var(--ring);
-            outline-offset: 2px;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            border-radius: calc(var(--radius) - 2px);
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .badge-secondary {
-            background-color: var(--secondary);
-            color: var(--secondary-foreground);
-        }
-
-        .badge-outline {
-            background-color: transparent;
-            color: var(--foreground);
-            border: 1px solid var(--border);
-        }
-
-        .progress {
-            background-color: var(--secondary);
-            border-radius: var(--radius);
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            background-color: var(--primary);
-            height: 100%;
-            transition: width 0.3s ease;
-        }
-
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 50;
-        }
-
-        .modal-content {
-            background-color: var(--card);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            max-width: 28rem;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .toast {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            background-color: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            z-index: 100;
-        }
-
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .container {
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
-            
-            .grid-cols-3 {
-                grid-template-columns: 1fr;
-            }
-            
-            .md\:grid-cols-2 {
-                grid-template-columns: 1fr;
-            }
-            
-            .md\:grid-cols-3 {
-                grid-template-columns: 1fr;
-            }
-            
-            .flex-col-mobile {
-                flex-direction: column;
-            }
-            
-            .w-full-mobile {
-                width: 100%;
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b'
+                    }
+                }
             }
         }
-
-        @media (min-width: 768px) {
-            .md\:grid-cols-2 {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .md\:grid-cols-3 {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
-            .md\:flex-row {
-                flex-direction: row;
-            }
-        }
-    </style>
+    </script>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useCallback } = React;
+        const { useState, useEffect, useMemo } = React;
+        const { createRoot } = ReactDOM;
         const { 
-            PlusCircle, Wallet, TrendingUp, TrendingDown, Download, Upload, 
-            Search, Moon, Sun, Trash2, Edit, ChevronLeft, ChevronRight, Target 
-        } = lucideReact;
-        const { 
-            PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, 
-            XAxis, YAxis, CartesianGrid, Tooltip 
+            BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+            PieChart, Pie, Cell, LineChart, Line 
         } = Recharts;
+        
+        const LucideIcons = window.LucideReact || {};
+        const { 
+            Plus = () => React.createElement('span', null, '+'),
+            Trash2 = () => React.createElement('span', null, '🗑️'),
+            Calendar = () => React.createElement('span', null, '📅'),
+            TrendingUp = () => React.createElement('span', null, '📈'),
+            Target = () => React.createElement('span', null, '🎯'),
+            BarChart3 = () => React.createElement('span', null, '📊'),
+            PieChart: PieChartIcon = () => React.createElement('span', null, '🥧'),
+            DollarSign = () => React.createElement('span', null, '💰'),
+            CreditCard = () => React.createElement('span', null, '💳'),
+            Home = () => React.createElement('span', null, '🏠'),
+            Car = () => React.createElement('span', null, '🚗'),
+            Utensils = () => React.createElement('span', null, '🍽️'),
+            ShoppingBag = () => React.createElement('span', null, '🛍️'),
+            Gamepad2 = () => React.createElement('span', null, '🎮'),
+            MoreHorizontal = () => React.createElement('span', null, '⋯'
+        } = LucideIcons;
 
         // Constants
         const CATEGORIES = {
@@ -596,14 +418,14 @@
             const barData = Object.values(monthlyData).sort((a, b) => a.month.localeCompare(b.month));
 
             return (
-                <div className="grid gap-6 md:grid-cols-2">
+                <div className="grid gap-6 grid-cols-1">
                     <Card>
                         <CardHeader>
                             <CardTitle>카테고리별 지출</CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="overflow-hidden">
                             {pieData.length > 0 ? (
-                                <div className="h-80">
+                                <div className="h-64 w-full">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
                                             <Pie
@@ -612,7 +434,7 @@
                                                 cy="50%"
                                                 labelLine={false}
                                                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                                                outerRadius={80}
+                                                outerRadius={60}
                                                 fill="#8884d8"
                                                 dataKey="value"
                                             >
@@ -634,11 +456,11 @@
                         <CardHeader>
                             <CardTitle>월별 수입/지출</CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="overflow-hidden">
                             {barData.length > 0 ? (
-                                <div className="h-80">
+                                <div className="h-64 w-full">
                                     <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart data={barData}>
+                                        <BarChart data={barData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                             <CartesianGrid strokeDasharray="3 3" />
                                             <XAxis dataKey="month" />
                                             <YAxis />
@@ -825,9 +647,12 @@
                                     <Label htmlFor="targetAmount">목표 금액</Label>
                                     <Input
                                         id="targetAmount"
-                                        type="number"
-                                        value={formData.target}
-                                        onChange={(e) => setFormData((prev) => ({ ...prev, target: Number(e.target.value) }))}
+                                        type="text"
+                                        value={formData.target ? formatNumber(formData.target) : ''}
+                                        onChange={(e) => {
+                                            const numValue = parseFormattedNumber(e.target.value);
+                                            setFormData((prev) => ({ ...prev, target: numValue }));
+                                        }}
                                         placeholder="0"
                                         required
                                     />
@@ -867,6 +692,14 @@
                 tags: transaction?.tags?.join(", ") || "",
                 memo: transaction?.memo || "",
             });
+
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        function parseFormattedNumber(str) {
+            return parseInt(str.replace(/,/g, '')) || 0;
+        }
 
             const handleSubmit = (e) => {
                 e.preventDefault();
@@ -929,9 +762,12 @@
                             <Label htmlFor="amount">금액</Label>
                             <Input
                                 id="amount"
-                                type="number"
-                                value={formData.amount}
-                                onChange={(e) => setFormData((prev) => ({ ...prev, amount: Number(e.target.value) }))}
+                                type="text"
+                                value={formData.amount ? formatNumber(formData.amount) : ''}
+                                onChange={(e) => {
+                                    const numValue = parseFormattedNumber(e.target.value);
+                                    setFormData((prev) => ({ ...prev, amount: numValue }));
+                                }}
                                 placeholder="0"
                                 required
                             />
@@ -1039,10 +875,13 @@
                                     ))}
                                 </Select>
                                 <Input
-                                    type="number"
+                                    type="text"
                                     placeholder="예산 금액"
-                                    value={newBudget.amount || ""}
-                                    onChange={(e) => setNewBudget((prev) => ({ ...prev, amount: Number(e.target.value) }))}
+                                    value={newBudget.amount ? formatNumber(newBudget.amount) : ''}
+                                    onChange={(e) => {
+                                        const numValue = parseFormattedNumber(e.target.value);
+                                        setNewBudget((prev) => ({ ...prev, amount: numValue }));
+                                    }}
                                     className="flex-1"
                                 />
                                 <Button onClick={addBudget}>추가</Button>
